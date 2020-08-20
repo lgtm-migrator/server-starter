@@ -1,16 +1,18 @@
 import { InjectContainer } from "@newdash/inject";
+import { TypedODataServer } from "@odata/server";
 import "reflect-metadata";
-import { Configuration, ConfigurationProvider } from "./config";
+import { InjectKey } from "./.internal";
+import { Configuration } from "./config";
+import { ConfigurationProvider, ConnectionProvider, ODataProvider } from "./providers";
 import { ApplicationServer } from "./server";
-
 
 if (require.main == module) {
 
   (async () => {
 
     const ic = InjectContainer.New();
-    ic.registerProvider(ConfigurationProvider);
-    ic.doNotWrap(Configuration);
+    ic.registerProvider(ConfigurationProvider, ODataProvider, ConnectionProvider);
+    ic.doNotWrap(Configuration, TypedODataServer, InjectKey.DBConnection);
 
     const config = await ic.getInstance(Configuration);
     const appServer = await ic.getInstance(ApplicationServer);

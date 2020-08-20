@@ -9,7 +9,9 @@ const KEY_METHOD_PATH = "controller:method:path"
 export enum InjectKey {
   Request = 'express:request',
   Response = 'express:response',
-  NextFunction = 'express:next_function'
+  NextFunction = 'express:next_function',
+
+  DBConnection = 'db:connection'
 }
 
 export type HTTPMethod = 'get' | 'post' | 'patch' | 'delete' | 'put'

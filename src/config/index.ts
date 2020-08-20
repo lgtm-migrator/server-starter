@@ -1,4 +1,3 @@
-import { provider } from "@newdash/inject";
 import { forEach } from "@newdash/newdash/forEach";
 
 export class Configuration {
@@ -24,20 +23,3 @@ export class Configuration {
 
 }
 
-
-export class ConfigurationProvider {
-
-
-  @provider(Configuration)
-  async provide() {
-    const defaultOpt = await import("./default");
-    let envOpt = {};
-    if (process.env.PROFILE) {
-      envOpt = await import(`./${process.env.PROFILE}`);
-      envOpt['PROFILE'] = process.env.PROFILE;
-    }
-    const mergedOpt = Object.assign(defaultOpt, envOpt);
-    return new Configuration(mergedOpt);
-  }
-
-}

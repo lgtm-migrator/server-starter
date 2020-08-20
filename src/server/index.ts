@@ -1,5 +1,7 @@
 import { inject, InjectContainer } from "@newdash/inject";
+import { TypedODataServer } from "@odata/server";
 import express from "express";
+import session from "express-session";
 import { createRouter } from "../.internal";
 import { Configuration } from "../config";
 import { IndexController } from "../controllers/IndexController";
@@ -16,6 +18,9 @@ export class ApplicationServer {
   @inject()
   injectContainer: InjectContainer
 
+  @inject(TypedODataServer)
+  odata: typeof TypedODataServer
+
   async createServer(): Promise<express.Express> {
 
     const cookieParser = require('cookie-parser');
@@ -26,8 +31,11 @@ export class ApplicationServer {
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
+    app.use(session({ secret: "secret" }));
 
     app.use(createRouter(this.indexController, this.injectContainer));
+
+    app.use("/odata", this.odata.create());
 
     app.use(NotFoundHandler);
     app.use(ErrorHandler);

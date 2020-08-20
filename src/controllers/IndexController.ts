@@ -1,5 +1,6 @@
 import { inject } from "@newdash/inject";
-import { Get } from "../.internal";
+import { Request } from "express";
+import { Get, InjectKey } from "../.internal";
 import { Configuration } from "../config";
 
 export class IndexController {
@@ -15,6 +16,14 @@ export class IndexController {
   status() {
     return {
       status: 200
+    };
+  }
+
+  @Get("/count")
+  count(@inject(InjectKey.Request) req: Request) {
+    req.session.count = (req.session.count || 0) + 1;
+    return {
+      count: req.session.count
     };
   }
 
