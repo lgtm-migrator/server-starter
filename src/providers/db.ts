@@ -1,6 +1,5 @@
 import { inject, provider } from "@newdash/inject";
-import { createDBConnection } from "@odata/server";
-import { InjectKey } from "../.internal";
+import { Connection, createDBConnection } from "@odata/server";
 import { Configuration } from "../config";
 import { People } from "../models/People";
 
@@ -9,7 +8,7 @@ export class ConnectionProvider {
   @inject()
   private config: Configuration
 
-  @provider(InjectKey.DBConnection)
+  @provider(Connection)
   async provide() {
     // read connection info from config
     return createDBConnection({

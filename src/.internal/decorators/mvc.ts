@@ -1,18 +1,12 @@
-import { getUnProxyTarget, InjectContainer } from "@newdash/inject";
+import { getUnProxyTarget, inject, InjectContainer } from "@newdash/inject";
 import forEach from "@newdash/newdash/forEach";
 import express from "express";
 import "reflect-metadata";
+import { InjectType } from "../../constants";
 
 const KEY_METHOD_HTTP_METHOD = "controller:method:http_method"
 const KEY_METHOD_PATH = "controller:method:path"
 
-export enum InjectKey {
-  Request = 'express:request',
-  Response = 'express:response',
-  NextFunction = 'express:next_function',
-
-  DBConnection = 'db:connection'
-}
 
 export type HTTPMethod = 'get' | 'post' | 'patch' | 'delete' | 'put'
 
@@ -47,6 +41,14 @@ export const Put = (path?: string) => method('put', path)
 export const Patch = (path?: string) => method('patch', path)
 export const Delete = (path?: string) => method('delete', path)
 
+export function InjectRequest(target, targetKey, parameterIndex) {
+  return inject(InjectType.Request)(target, targetKey, parameterIndex)
+}
+
+
+export function InjectResponse(target, targetKey, parameterIndex) {
+  return inject(InjectType.Request)(target, targetKey, parameterIndex)
+}
 
 /**
  * create router from controller
@@ -68,9 +70,9 @@ export function createRouter(controller, ic: InjectContainer) {
       const handler = async (req, res: express.Response, next) => {
 
         const c = await ic.createSubContainer()
-        c.registerInstance(InjectKey.Request, req)
-        c.registerInstance(InjectKey.Response, res)
-        c.registerInstance(InjectKey.NextFunction, next)
+        c.registerInstance(InjectType.Request, req)
+        c.registerInstance(InjectType.Response, res)
+        c.registerInstance(InjectType.NextFunction, next)
 
         try {
 

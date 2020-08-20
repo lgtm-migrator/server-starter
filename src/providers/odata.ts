@@ -1,11 +1,10 @@
 import { inject, provider } from "@newdash/inject";
-import { createTypedODataServer, TypedODataServer } from "@odata/server";
-import { InjectKey } from "../.internal";
+import { Connection, createTypedODataServer, TypedODataServer } from "@odata/server";
 import { People } from "../models/People";
 
 export class ODataProvider {
 
-  @inject(InjectKey.DBConnection)
+  @inject(Connection)
   conn: any
 
   @provider(TypedODataServer)

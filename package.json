@@ -15,12 +15,12 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@newdash/inject": "0.2.2",
+    "@newdash/inject": "0.2.3",
     "@newdash/newdash": "^5.13.0",
-    "@odata/server": "^0.2.29",
+    "@odata/server": "^0.2.30",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "express": "~4.16.1",
+    "express": "~4.17.1",
     "express-session": "^1.17.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",

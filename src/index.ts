@@ -1,24 +1,25 @@
 import { InjectContainer } from "@newdash/inject";
-import { TypedODataServer } from "@odata/server";
+import { Connection, TypedODataServer } from "@odata/server";
+import { Express } from "express";
 import "reflect-metadata";
-import { InjectKey } from "./.internal";
 import { Configuration } from "./config";
-import { ConfigurationProvider, ConnectionProvider, ODataProvider } from "./providers";
-import { ApplicationServer } from "./server";
-
+import { InjectType } from "./constants";
+import { ConfigurationProvider, ConnectionProvider, ODataProvider, ServerProvider } from "./providers";
 if (require.main == module) {
 
   (async () => {
 
     const ic = InjectContainer.New();
-    ic.registerProvider(ConfigurationProvider, ODataProvider, ConnectionProvider);
-    ic.doNotWrap(Configuration, TypedODataServer, InjectKey.DBConnection);
+    // register providers
+    ic.registerProvider(ConfigurationProvider, ODataProvider, ConnectionProvider, ServerProvider);
+    // do not wrap this types
+    ic.doNotWrap(Configuration, TypedODataServer, Connection);
 
     const config = await ic.getInstance(Configuration);
-    const appServer = await ic.getInstance(ApplicationServer);
-    const app = await appServer.createServer();
+    const app = await ic.getInstance(InjectType.Server) as Express;
+    const port = parseInt(config.get("PORT"), 10);
 
-    app.listen(parseInt(config.get("PORT"), 10));
+    app.listen(port, () => console.log(`app started at port ${port}`));
 
   })().catch(console.error);
 
