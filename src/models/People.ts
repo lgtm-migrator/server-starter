@@ -1,10 +1,10 @@
-import { BaseODataModel, KeyProperty, ODataEntityType, Property } from "@odata/server";
+import { BaseODataModel, IncKeyProperty, ODataEntityType, Property } from "@odata/server";
 import "reflect-metadata";
 
 @ODataEntityType()
 export class People extends BaseODataModel {
 
-  @KeyProperty()
+  @IncKeyProperty()
   pid: number;
 
   @Property()

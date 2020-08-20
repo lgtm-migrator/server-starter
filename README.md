@@ -1,6 +1,6 @@
 # Typescript Server Template
 
-typescript project template
+typescript server project template
 
 ## Setup
 
