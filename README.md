@@ -1,4 +1,4 @@
-# Typescript Project Template
+# Typescript Server Template
 
 typescript project template
 

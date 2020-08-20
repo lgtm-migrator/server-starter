@@ -2,6 +2,7 @@
   "name": "template",
   "version": "0.0.1",
   "main": "lib/index.js",
+  "private": true,
   "scripts": {
     "prebuild": "rimraf lib",
     "test": "jest --detectOpenHandles --passWithNoTests",
@@ -13,9 +14,21 @@
   "engines": {
     "node": ">=10"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@newdash/inject": "0.0.14",
+    "@newdash/newdash": "^5.13.0",
+    "@odata/server": "^0.2.29",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "express-session": "^1.17.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "reflect-metadata": "^0.1.13"
+  },
   "devDependencies": {
     "@commitlint/config-conventional": "^9.1.2",
+    "@types/http-errors": "^1.8.0",
     "@types/jest": "^26.0.10",
     "@types/node": "^14.6.0",
     "@typescript-eslint/eslint-plugin": "^3.9.1",
