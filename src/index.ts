@@ -10,10 +10,21 @@ if (require.main == module) {
   (async () => {
 
     const ic = InjectContainer.New();
+
     // register providers
-    ic.registerProvider(ConfigurationProvider, ODataProvider, ConnectionProvider, ServerProvider);
+    ic.registerProvider(
+      ConfigurationProvider,
+      ODataProvider,
+      ConnectionProvider,
+      ServerProvider
+    );
+
     // do not wrap this types
-    ic.doNotWrap(Configuration, TypedODataServer, Connection);
+    ic.doNotWrap(
+      Configuration,
+      TypedODataServer,
+      Connection
+    );
 
     const config = await ic.getInstance(Configuration);
     const app = await ic.getInstance(InjectType.Server) as Express;

@@ -15,7 +15,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@newdash/inject": "0.2.3",
+    "@newdash/inject": "0.2.5",
     "@newdash/newdash": "^5.13.0",
     "@odata/server": "^0.2.30",
     "cookie-parser": "~1.4.4",

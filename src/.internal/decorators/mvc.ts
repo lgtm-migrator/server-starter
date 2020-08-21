@@ -1,4 +1,4 @@
-import { getUnProxyTarget, inject, InjectContainer } from "@newdash/inject";
+import { createInjectDecorator, getUnProxyTarget, InjectContainer } from "@newdash/inject";
 import forEach from "@newdash/newdash/forEach";
 import express from "express";
 import "reflect-metadata";
@@ -41,14 +41,9 @@ export const Put = (path?: string) => method('put', path)
 export const Patch = (path?: string) => method('patch', path)
 export const Delete = (path?: string) => method('delete', path)
 
-export function InjectRequest(target, targetKey, parameterIndex) {
-  return inject(InjectType.Request)(target, targetKey, parameterIndex)
-}
+export const InjectRequest = createInjectDecorator(InjectType.Request)
 
-
-export function InjectResponse(target, targetKey, parameterIndex) {
-  return inject(InjectType.Request)(target, targetKey, parameterIndex)
-}
+export const InjectResponse = createInjectDecorator(InjectType.Request)
 
 /**
  * create router from controller
