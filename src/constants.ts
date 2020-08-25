@@ -6,4 +6,8 @@ export enum InjectType {
   Response = 'express:response',
   NextFunction = 'express:next_function',
 
+  Controllers = 'application:controllers',
+  Services = 'application:services',
+
+
 }
