@@ -9,5 +9,8 @@ export enum InjectType {
   Controllers = 'application:controllers',
   Services = 'application:services',
 
+  ODataService = 'odata:service',
+  ODataTransaction = 'odata:transaction',
+  ODataServiceType = 'odata:service_type',
 
 }

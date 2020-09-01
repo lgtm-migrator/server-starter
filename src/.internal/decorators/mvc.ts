@@ -1,5 +1,6 @@
 import { createInjectDecorator, getUnProxyTarget, InjectContainer } from "@newdash/inject";
 import forEach from "@newdash/newdash/forEach";
+import { createTransactionContext } from "@odata/server";
 import express from "express";
 import "reflect-metadata";
 import { InjectType } from "../../constants";
@@ -68,6 +69,8 @@ export function createRouter(controller, ic: InjectContainer) {
         c.registerInstance(InjectType.Request, req)
         c.registerInstance(InjectType.Response, res)
         c.registerInstance(InjectType.NextFunction, next)
+        c.registerInstance(InjectType.ODataTransaction, createTransactionContext())
+
 
         try {
 
@@ -76,6 +79,10 @@ export function createRouter(controller, ic: InjectContainer) {
           if (rt != undefined) {
             if (rt instanceof Promise) {
               rt = await rt
+            }
+            const tx = await c.getInstance(InjectType.ODataTransaction)
+            if (tx !== undefined) {
+              await tx.commit();
             }
             if (!res.writableEnded) {
               res.json(rt)

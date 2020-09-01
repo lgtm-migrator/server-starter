@@ -1,7 +1,9 @@
-import { inject } from "@newdash/inject";
+import { inject, InjectWrappedInstance } from "@newdash/inject";
+import { TypedService } from "@odata/server";
 import { Request } from "express";
-import { Get, InjectRequest } from "../.internal";
+import { Get, InjectRequest, withODataService } from "../.internal";
 import { Configuration } from "../config";
+import { People } from "../models/People";
 
 export class IndexController {
 
@@ -31,6 +33,11 @@ export class IndexController {
   @Get("/error")
   error() {
     throw new Error("an example error");
+  }
+
+  @Get("/peoples")
+  peoples(@withODataService(People) peopleService: InjectWrappedInstance<TypedService<People>>) {
+    return peopleService.find();
   }
 
 

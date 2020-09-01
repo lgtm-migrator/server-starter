@@ -1,4 +1,4 @@
-import { noWrap, provider } from "@newdash/inject";
+import { inject, noWrap, provider, required, transient, withType } from "@newdash/inject";
 import { register } from "../.internal";
 import { Configuration } from "../config";
 
@@ -16,6 +16,20 @@ export class ConfigurationProvider {
     }
     const mergedOpt = Object.assign(defaultOpt, envOpt);
     return new Configuration(mergedOpt);
+  }
+
+}
+
+@register
+export class ConfigurationValueProvider {
+
+  @transient
+  @withType("configuration:value")
+  provide(
+    @required @inject(Configuration) config: Configuration,
+    @required @inject("configuration:value_key") key: any
+  ) {
+    return config.get(key);
   }
 
 }
