@@ -81,9 +81,8 @@ export function createRouter(controller, ic: InjectContainer) {
               rt = await rt
             }
             const tx = await c.getInstance(InjectType.ODataTransaction)
-            if (tx !== undefined) {
-              await tx.commit();
-            }
+            // auto commit
+            if (tx !== undefined) { await tx.commit(); }
             if (!res.writableEnded) {
               res.json(rt)
             }

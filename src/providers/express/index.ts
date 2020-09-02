@@ -1,4 +1,4 @@
-import { createInjectDecorator, inject, InjectContainer, noWrap, withType } from "@newdash/inject";
+import { createInjectDecorator, inject, InjectContainer, noWrap, transient, withType } from "@newdash/inject";
 import { TypedODataServer } from "@odata/server";
 import express from "express";
 import session from "express-session";
@@ -23,12 +23,12 @@ export class ServerProvider {
   @inject()
   injectContainer: InjectContainer
 
+  @transient
   @withType(InjectType.Server)
   @noWrap
   async provide(): Promise<express.Express> {
 
     const cookieParser = require('cookie-parser');
-    const logger = require('morgan');
     const app = express();
 
     // app.use(logger('combined'));
