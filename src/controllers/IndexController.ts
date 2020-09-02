@@ -1,16 +1,18 @@
-import { inject, InjectWrappedInstance } from "@newdash/inject";
+import { InjectWrappedInstance } from "@newdash/inject";
 import { TypedService } from "@odata/server";
 import { Request } from "express";
-import { Get, InjectRequest, withODataService } from "../.internal";
-import { Configuration } from "../config";
+import { Get, InjectRequest, withConfigValue, withODataService } from "../.internal";
 import { People } from "../models/People";
 
 export class IndexController {
 
+  @withConfigValue("SERVER_NAME")
+  private serverName: string;
+
   @Get()
-  index(@inject(Configuration) config: Configuration) {
+  index() {
     return {
-      service: config.get("SERVER_NAME"),
+      service: this.serverName,
     };
   }
 
