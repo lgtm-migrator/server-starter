@@ -17,7 +17,7 @@
   "dependencies": {
     "@newdash/inject": "0.2.18",
     "@newdash/newdash": "^5.13.0",
-    "@odata/server": "^0.2.33",
+    "@odata/server": "^0.2.34",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.17.1",
@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^9.1.2",
-    "@types/express-session": "^1.17.0",
     "@types/got": "^9.6.11",
     "@types/http-errors": "^1.8.0",
     "@types/jest": "^26.0.10",
