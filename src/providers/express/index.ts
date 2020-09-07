@@ -6,7 +6,7 @@ import { createRouter, register } from "../../.internal";
 import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
 import { injectControllers } from "../controllers";
-import { ErrorHandler, NotFoundHandler } from "./middlewares";
+import { createInjectRequestContainer, ErrorHandler, NotFoundHandler } from "./middlewares";
 
 @register
 export class ServerProvider {
@@ -36,8 +36,11 @@ export class ServerProvider {
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
     app.use(session({ secret: "secret", resave: false, saveUninitialized: false }));
+
+    app.use(createInjectRequestContainer(this.injectContainer));
+
     this.controllers.forEach(controller => {
-      app.use(createRouter(controller, this.injectContainer));
+      app.use(createRouter(controller));
     });
 
     app.use("/odata", this.odata.create());

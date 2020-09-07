@@ -1,6 +1,5 @@
 import { createInjectDecorator, getUnProxyTarget, InjectContainer } from "@newdash/inject";
 import forEach from "@newdash/newdash/forEach";
-import { createTransactionContext } from "@odata/server";
 import express from "express";
 import "reflect-metadata";
 import { InjectType } from "../../constants";
@@ -51,26 +50,26 @@ export const InjectResponse = createInjectDecorator(InjectType.Request)
  * 
  * @param controller 
  */
-export function createRouter(controller, ic: InjectContainer) {
+export function createRouter(controller) {
   const rt = express.Router()
 
   forEach(Object.getOwnPropertyNames(getUnProxyTarget(controller).constructor.prototype), (methodName) => {
+
     const httpMethod = getMethod(controller, methodName)
+
+    // with http method decorator
+    // means it's an exported api
     if (httpMethod) {
-      let methodPath = getPath(controller, methodName)
-      if (methodPath == undefined) {
-        methodPath = '/'
+
+      let requestPath = getPath(controller, methodName)
+
+      if (requestPath == undefined) {
+        requestPath = '/'
       }
 
+      const handler: express.Handler = async (req, res, next) => {
 
-      const handler = async (req, res: express.Response, next) => {
-
-        const c = await ic.createSubContainer()
-        c.registerInstance(InjectType.Request, req)
-        c.registerInstance(InjectType.Response, res)
-        c.registerInstance(InjectType.NextFunction, next)
-        c.registerInstance(InjectType.ODataTransaction, createTransactionContext())
-
+        const c: InjectContainer = res.locals.container
 
         try {
 
@@ -93,7 +92,7 @@ export function createRouter(controller, ic: InjectContainer) {
         }
       }
 
-      rt[httpMethod](methodPath, handler)
+      rt[httpMethod](requestPath, handler)
     }
   })
 
