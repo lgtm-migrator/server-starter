@@ -12,7 +12,11 @@
       ],
       "skipFiles": [
         "<node_internals>/**"
-      ]
+      ],
+      "outputCapture": "std",
+      "env": {
+        "DEBUG": "@newdash*"
+      }
     },
     {
       "type": "node",
