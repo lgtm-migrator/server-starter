@@ -45,6 +45,16 @@ export function createInjectRequestContainer(ic: InjectContainer) {
 }
 
 
+/**
+ * 
+ * attach the uaa authentication & authorization to express app
+ * 
+ * ref the [cf uaa doc](https://docs.cloudfoundry.org/api/uaa/version/74.27.0/index.html#overview)
+ * 
+ * @param app 
+ * @param uaaCredential 
+ * @param appUri 
+ */
 export function withUAA(app: express.Express, uaaCredential, appUri) {
 
   const oauth = new ClientOAuth2({
@@ -55,52 +65,112 @@ export function withUAA(app: express.Express, uaaCredential, appUri) {
     redirectUri: `${appUri}/login/callback`
   });
 
-
+  // convert XSUAA provided key to valid nodejs format (with line break)
   const verifyKey = uaaCredential.verificationkey
     .replace(/-----BEGIN PUBLIC KEY-----/g, "-----BEGIN PUBLIC KEY-----\n")
     .replace(/-----END PUBLIC KEY-----/g, "\n-----END PUBLIC KEY-----");
 
+  // public oauth login callback
   app.get("/login/callback", async req => {
 
-    try {
-      const token = await oauth.code.getToken(req.originalUrl);
-      const { id_token } = token.data;
-      const user = jwt.verify(id_token, verifyKey);
-
-      req.session.user = user;
-      req.session.login = true;
-
-      req.res.redirect(req.query['state'] as string || '/user');
-
-    } catch (error) {
-      req.next(error);
+    if (req.session.login === true) {
+      req.next(new Error("You have logged, please do not access this url again."));
     }
+    else if (!('code' in req.query)) {
+      // callback called, but not provider 'code'
+      req.next(new Error("Not valid callback, must provide 'code' in query parameters."));
+    }
+    else {
+
+      try {
+
+        // get user access token (can NOT be verified with public key)
+        const token = await oauth.code.getToken(req.originalUrl);
+        // get user jwt token (can be verified with public key)
+        const clientJwt = await oauth.jwt.getToken(token.accessToken);
+        // verify jwt
+        const user = jwt.verify(clientJwt.accessToken, verifyKey);
+
+        req.session.user = user;
+        req.session.login = true;
+        // it can forward to other applications
+        req.session.jwt = clientJwt.accessToken;
+
+        // redirect to previous url, if state lost, default to '/user'
+        req.res.redirect(req.query['state'] as string || '/user');
+
+      } catch (error) {
+
+        req.next(error);
+
+      }
+
+    }
+
+
 
   });
 
-  app.use((req: Request) => {
+  app.use(async (req: Request) => {
 
-    // session not login
-    if (req.session.login !== true) {
-      // with jwt
-      if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
-        try {
-          const user = jwt.verify(req.headers.authorization.substr(7), verifyKey);
+    try {
+      // session is not login
+      if (req.session.login !== true) {
+        // inbound request with jwt (offline login)
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+          try {
+            // read jwt token from header
+
+            // please remember to use the 'JWT Bearer Token Grant' returned `access_token` instead of 'id_token'
+            // because the `id_token` is only have 'openid' scopes 
+            const authorizationContent = req.headers.authorization.substr(7);
+            const user = jwt.verify(authorizationContent, verifyKey);
+
+            // verified token
+            req.session.login = true;
+            req.session.user = user;
+            req.session.jwt = authorizationContent;
+
+            // go to next handler
+            req.next();
+          } catch (error) {
+            // not verified token
+            req.next(error);
+          }
+        }
+        // inbound request with basic auth (remote call required)
+        else if (req.headers.authorization && req.headers.authorization.startsWith("Basic ")) {
+          const authorizationContent = req.headers.authorization.substr(6);
+          const [username, password] = Buffer
+            .from(authorizationContent, 'base64')
+            .toString('utf8')
+            .split(":");
+          const token = await oauth.owner.getToken(username, password);
+          const clientJwt = await oauth.jwt.getToken(token.accessToken);
+          const user = jwt.verify(clientJwt.accessToken, verifyKey);
+
           // verified token
           req.session.login = true;
           req.session.user = user;
-          req.next(); // go to next handler
-        } catch (error) {
-          // not verified token
-          req.next(error);
+          req.session.jwt = clientJwt.accessToken;
+
+          // go to next handler
+          req.next();
         }
+        // without any other
+        else {
+          // store url to oauth.state
+          req.res.redirect(oauth.code.getUri({
+            state: req.originalUrl,
+          }));
+        }
+      } else {
+        // session is login
+        req.next();
       }
-      // without jwt
-      else {
-        req.res.redirect(oauth.code.getUri({ state: req.originalUrl }));
-      }
-    } else {
-      req.next();
+
+    } catch (error) {
+      req.next(error);
     }
 
   });
