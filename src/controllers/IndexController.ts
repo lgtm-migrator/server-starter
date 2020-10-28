@@ -1,6 +1,6 @@
 import { InjectWrappedInstance } from "@newdash/inject";
 import { TypedService } from "@odata/server";
-import { Request } from "express";
+import { Request } from "client-oauth2";
 import { Get, InjectRequest, withConfigValue, withODataService } from "../.internal";
 import { People } from "../models/People";
 
@@ -25,9 +25,19 @@ export class IndexController {
 
   @Get("/count")
   count(@InjectRequest req: Request) {
+    // @ts-ignore
     req.session.count = (req.session.count || 0) + 1;
     return {
+      // @ts-ignore
       count: req.session.count
+    };
+  }
+
+  @Get("/user")
+  user(@InjectRequest req: Request) {
+    return {
+      // @ts-ignore
+      user: req.session.user
     };
   }
 

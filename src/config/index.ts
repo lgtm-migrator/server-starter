@@ -1,4 +1,5 @@
 import { forEach } from "@newdash/newdash/forEach";
+import xsenv from "@sap/xsenv";
 
 export class Configuration {
 
@@ -15,10 +16,14 @@ export class Configuration {
         }
       }
     });
+    // load config from 'default-env.json'
+    xsenv.loadEnv();
   }
 
-  public get(key: string): string {
-    return this._store.get(key);
+  public get(key: string): any {
+    if (this._store.has(key)) { return this._store.get(key); }
+    // fallback to xs env
+    return xsenv.filterServices({ tag: key })[0];
   }
 
 }

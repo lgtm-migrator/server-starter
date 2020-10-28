@@ -108,3 +108,5 @@ lib
 
 # run
 *.db
+
+default-env.json*

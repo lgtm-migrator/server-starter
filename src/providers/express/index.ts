@@ -6,7 +6,7 @@ import { createRouter, register } from "../../.internal";
 import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
 import { injectControllers } from "../controllers";
-import { createInjectRequestContainer, ErrorHandler, NotFoundHandler } from "./middlewares";
+import { createInjectRequestContainer, ErrorHandler, NotFoundHandler, withUAA } from "./middlewares";
 
 @register
 export class ServerProvider {
@@ -31,11 +31,19 @@ export class ServerProvider {
     const cookieParser = require('cookie-parser');
     const app = express();
 
+    app.use(session({ secret: "secret", resave: false, saveUninitialized: false }));
+
+    const uaaService = this.config.get("xsuaa");
+
+    if (uaaService !== undefined) {
+      withUAA(app, uaaService.credentials, "http://127.0.0.1:3000");
+    }
+
     // app.use(logger('combined'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
-    app.use(session({ secret: "secret", resave: false, saveUninitialized: false }));
+
 
     app.use(createInjectRequestContainer(this.injectContainer));
 

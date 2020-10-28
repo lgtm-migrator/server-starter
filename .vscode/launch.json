@@ -15,7 +15,7 @@
       ],
       "outputCapture": "std",
       "env": {
-        "DEBUG": "@newdash*"
+        "DEBUG": "@newdash*",
       }
     },
     {
