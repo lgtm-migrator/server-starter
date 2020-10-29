@@ -73,9 +73,9 @@ export function createRouter(controller) {
 
         try {
 
-          let rt = c.injectExecute(controller, controller[methodName])
+          let rt = await c.injectExecute(controller, controller[methodName])
 
-          if (rt != undefined) {
+          if (rt !== undefined) {
             if (rt instanceof Promise) {
               rt = await rt
             }

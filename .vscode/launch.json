@@ -30,6 +30,18 @@
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
       "program": "${workspaceFolder}/node_modules/jest/bin/jest"
-    }
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "remote-debug",
+      "address": "127.0.0.1",
+      "port": 39999,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/home/vcap/app",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
   ]
 }

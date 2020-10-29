@@ -17,15 +17,17 @@ export class ControllersProvider {
     const items = fs.readdirSync(path.join(__dirname, "../controllers"));
 
     for (const item of items) {
-      const itemPath = path.join(__dirname, "../controllers", item);
-      const moduleObject = await import(itemPath);
-      if (moduleObject.default !== undefined) {
-        rt.push(await this.container.getWrappedInstance(moduleObject.default));
-      } else {
-        for (const key in moduleObject) {
-          if (Object.prototype.hasOwnProperty.call(moduleObject, key)) {
-            const propertyValue = moduleObject[key];
-            rt.push(await this.container.getWrappedInstance(propertyValue));
+      if (item.endsWith(".js") || item.endsWith(".ts")) {
+        const itemPath = path.join(__dirname, "../controllers", item);
+        const moduleObject = await import(itemPath);
+        if (moduleObject.default !== undefined) {
+          rt.push(await this.container.getWrappedInstance(moduleObject.default));
+        } else {
+          for (const key in moduleObject) {
+            if (Object.prototype.hasOwnProperty.call(moduleObject, key)) {
+              const propertyValue = moduleObject[key];
+              rt.push(await this.container.getWrappedInstance(propertyValue));
+            }
           }
         }
       }

@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "rimraf lib",
     "test": "jest --passWithNoTests --forceExit",
+    "start": "node lib/index",
     "build": "tsc",
     "lint": "eslint src/** --fix",
     "release": "standard-version --no-verify && git push --follow-tags origin master",
@@ -27,6 +28,7 @@
     "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.10.0",
+    "got": "^11.8.0",
     "reflect-metadata": "^0.1.13",
     "sql.js": "^1.4.0"
   },
@@ -43,7 +45,6 @@
     "@typescript-eslint/parser": "^4.6.0",
     "commitlint": "^11.0.0",
     "eslint": "^7.12.1",
-    "got": "^11.8.0",
     "husky": "^4.3.0",
     "jest": "^26.6.1",
     "rimraf": "^3.0.2",

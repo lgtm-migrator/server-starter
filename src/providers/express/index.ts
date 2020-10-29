@@ -36,7 +36,7 @@ export class ServerProvider {
     const uaaService = this.config.get("xsuaa");
 
     if (uaaService !== undefined) {
-      withUAA(app, uaaService.credentials, "http://127.0.0.1:3000");
+      withUAA(app, uaaService.credentials);
     }
 
     // app.use(logger('combined'));

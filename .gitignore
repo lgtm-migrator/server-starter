@@ -108,5 +108,6 @@ lib
 
 # run
 *.db
-
+.cfignore
 default-env.json*
+manifest.yml

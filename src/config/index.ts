@@ -21,9 +21,18 @@ export class Configuration {
   }
 
   public get(key: string): any {
-    if (this._store.has(key)) { return this._store.get(key); }
-    // fallback to xs env
-    return xsenv.filterServices({ tag: key })[0];
+    // lookup env firstly
+    if (key in process.env) {
+      return process.env[key];
+    }
+    const cfEnv = xsenv.filterServices({ tag: key })[0];
+    if (cfEnv != undefined) {
+      return cfEnv;
+    }
+    if (this._store.has(key)) {
+      return this._store.get(key);
+    }
+    return undefined;
   }
 
 }
