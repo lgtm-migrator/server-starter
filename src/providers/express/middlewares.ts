@@ -86,15 +86,13 @@ export function withUAA(app: express.Express, uaaCredential, appUri) {
 
         // get user access token (can NOT be verified with public key)
         const token = await oauth.code.getToken(req.originalUrl);
-        // get user jwt token (can be verified with public key)
-        const clientJwt = await oauth.jwt.getToken(token.accessToken);
         // verify jwt
-        const user = jwt.verify(clientJwt.accessToken, verifyKey);
+        const user = jwt.verify(token.accessToken, verifyKey);
 
         req.session.user = user;
         req.session.login = true;
         // it can forward to other applications
-        req.session.jwt = clientJwt.accessToken;
+        req.session.jwt = token.accessToken;
 
         // redirect to previous url, if state lost, default to '/user'
         req.res.redirect(req.query['state'] as string || '/user');
@@ -120,9 +118,6 @@ export function withUAA(app: express.Express, uaaCredential, appUri) {
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
           try {
             // read jwt token from header
-
-            // please remember to use the 'JWT Bearer Token Grant' returned `access_token` instead of 'id_token'
-            // because the `id_token` is only have 'openid' scopes 
             const authorizationContent = req.headers.authorization.substr(7);
             const user = jwt.verify(authorizationContent, verifyKey);
 
@@ -140,19 +135,19 @@ export function withUAA(app: express.Express, uaaCredential, appUri) {
         }
         // inbound request with basic auth (remote call required)
         else if (req.headers.authorization && req.headers.authorization.startsWith("Basic ")) {
+          // for API call, developer could use TTL cache the user/password result in short time period
           const authorizationContent = req.headers.authorization.substr(6);
           const [username, password] = Buffer
             .from(authorizationContent, 'base64')
             .toString('utf8')
             .split(":");
           const token = await oauth.owner.getToken(username, password);
-          const clientJwt = await oauth.jwt.getToken(token.accessToken);
-          const user = jwt.verify(clientJwt.accessToken, verifyKey);
+          const user = jwt.verify(token.accessToken, verifyKey);
 
           // verified token
           req.session.login = true;
           req.session.user = user;
-          req.session.jwt = clientJwt.accessToken;
+          req.session.jwt = token.accessToken;
 
           // go to next handler
           req.next();
