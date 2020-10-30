@@ -1,8 +1,7 @@
 import { createInjectDecorator, inject, InjectContainer, noWrap, transient, withType } from "@newdash/inject";
-import { TypedODataServer } from "@odata/server";
 import express from "express";
 import session from "express-session";
-import { createRouter, register } from "../../.internal";
+import { createRouter, register, withConfigValue } from "../../.internal";
 import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
 import { injectControllers } from "../controllers";
@@ -17,8 +16,9 @@ export class ServerProvider {
   @injectControllers
   controllers: any[]
 
-  @inject(TypedODataServer)
-  odata: typeof TypedODataServer
+  @withConfigValue("xsuaa")
+  @noWrap
+  uaaConfig: any
 
   @inject()
   injectContainer: InjectContainer
@@ -33,10 +33,8 @@ export class ServerProvider {
 
     app.use(session({ secret: "secret", resave: false, saveUninitialized: false }));
 
-    const uaaService = this.config.get("xsuaa");
-
-    if (uaaService !== undefined) {
-      withUAA(app, uaaService.credentials);
+    if (this.uaaConfig !== undefined) {
+      withUAA(app, this.uaaConfig.credentials);
     }
 
     // app.use(logger('combined'));

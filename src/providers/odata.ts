@@ -14,7 +14,10 @@ export class ODataProvider {
   @noWrap
   @transient
   @withType(InjectType.ODataServer)
-  async provide(@noWrap @inject(InjectType.TenantId) tenantId: string, @noWrap @inject(Connection) conn: Connection) {
+  async provide(
+    @noWrap @inject(InjectType.TenantId) tenantId: string,
+    @noWrap @inject(Connection) conn: Connection
+  ) {
     if (this.tenants === undefined) {
       this.tenants = new Map();
     }
@@ -57,7 +60,7 @@ export class ODataServiceProvider {
   @withType(InjectType.ODataService)
   async provide(
     @required @inject(InjectType.ODataServiceType) entityType,
-    @required @inject(TypedODataServer) server: typeof TypedODataServer,
+    @required @inject(InjectType.ODataServer) server: typeof TypedODataServer,
     @required @inject(InjectType.ODataTransaction) tx: TransactionContext
   ) {
     const [service] = await server.getServicesWithContext(tx, getUnProxyTarget(entityType));

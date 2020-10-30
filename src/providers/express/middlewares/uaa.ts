@@ -79,7 +79,7 @@ const verifyAccessToken = async (accessToken: string, uaaCredential: any) => {
 
 };
 
-const createOAuthOptionsBuilder = (uaa: any, appHost: string) => (req: Request, options: Options = {}) => {
+const createOAuthOptionsBuilder = (uaa: any, appHost: string) => (req: Request, options: Options = {}): Options => {
   return {
     ...options,
     authorizationUri: `https://${getUAAHost(req, uaa, appHost)}/oauth/authorize`,
@@ -102,9 +102,7 @@ export function withUAA(app: express.Express, uaaCredential) {
   const application = JSON.parse(process.env.VCAP_APPLICATION);
   const applicationMainHost = application.application_uris[0];
 
-  // TO DO, update uaa target with multi-tenant
   const oauth = new ClientOAuth2({
-
     clientId: uaaCredential.clientid,
     clientSecret: uaaCredential.clientsecret,
   });

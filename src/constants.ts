@@ -15,6 +15,7 @@ export enum InjectType {
   ODataTransaction = 'odata:transaction',
   ODataServiceType = 'odata:service_type',
 
-  TenantId = 'application:TenantId'
+  TenantId = 'application:tenant-id',
+  UaaCredential = 'application:uaa-credential'
 
 }

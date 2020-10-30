@@ -2,7 +2,9 @@ import { createInjectDecorator, getUnProxyTarget, InjectContainer } from "@newda
 import forEach from "@newdash/newdash/forEach";
 import express from "express";
 import "reflect-metadata";
+import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
+import { checkPermission } from "./permission";
 
 const KEY_METHOD_HTTP_METHOD = "controller:method:http_method"
 const KEY_METHOD_PATH = "controller:method:path"
@@ -34,6 +36,7 @@ export function getMethod(target, targetKey) {
   target = getUnProxyTarget(target)
   return Reflect.getMetadata(KEY_METHOD_HTTP_METHOD, target, targetKey)
 }
+
 
 export const Get = (path?: string) => method('get', path)
 export const Post = (path?: string) => method('post', path)
@@ -72,6 +75,16 @@ export function createRouter(controller) {
         const c: InjectContainer = res.locals.container
 
         try {
+          const uaaConfig: any = await (await c.getInstance(Configuration)).get("xsuaa")
+
+          if (uaaConfig !== undefined) {
+            checkPermission(
+              getUnProxyTarget(controller),
+              methodName,
+              req.session.user,
+              uaaConfig.credentials
+            )
+          }
 
           let rt = await c.injectExecute(controller, controller[methodName])
 

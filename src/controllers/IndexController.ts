@@ -52,5 +52,4 @@ export class IndexController {
     return peopleService.find();
   }
 
-
 }

@@ -35,4 +35,5 @@ export interface XsSystemAttributes {
 }
 
 export interface XsUserAttributes {
+  [key: string]: Array<any>
 }

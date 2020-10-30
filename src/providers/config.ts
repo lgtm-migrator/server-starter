@@ -1,12 +1,12 @@
-import { inject, noWrap, provider, required, transient, withType } from "@newdash/inject";
+import { inject, noWrap, required, transient, withType } from "@newdash/inject";
 import { register } from "../.internal";
 import { Configuration } from "../config";
 
 @register
 export class ConfigurationProvider {
 
-  @provider(Configuration)
   @noWrap
+  @withType(Configuration)
   async provide() {
     const defaultOpt = await import("../config/default");
     let envOpt = {};
