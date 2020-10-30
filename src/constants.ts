@@ -9,8 +9,12 @@ export enum InjectType {
   Controllers = 'application:controllers',
   Services = 'application:services',
 
+  ODataServer = 'odata:server',
+  ODataServerRouter = 'odata:server-express-router',
   ODataService = 'odata:service',
   ODataTransaction = 'odata:transaction',
   ODataServiceType = 'odata:service_type',
+
+  TenantId = 'application:TenantId'
 
 }

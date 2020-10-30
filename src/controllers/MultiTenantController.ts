@@ -10,6 +10,7 @@ export class MultiTenantController {
     const { subscribedSubdomain } = req.body;
     const tenantUrl = `https://${subscribedSubdomain}-${req.headers.host}`;
     console.log(`call subscribe with ${tenantUrl}`);
+    // setup DB, create mapping, and other things
     req.res.end(tenantUrl);
   }
 
@@ -18,6 +19,7 @@ export class MultiTenantController {
     const { subscribedSubdomain } = req.body;
     const tenantUrl = `https://${subscribedSubdomain}-${req.headers.host}`;
     console.log(`call un-subscribe with ${tenantUrl}`);
+    // clean DB, stop metering, and other things
     req.res.status(200).end();
   }
 

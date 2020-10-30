@@ -1,52 +1,12 @@
-import { InjectContainer } from "@newdash/inject";
+
 import { cacheIt } from "@newdash/newdash/cacheIt";
 import { TTLCacheProvider } from "@newdash/newdash/cacheProvider";
-import { createTransactionContext } from "@odata/server";
-import ClientOAuth2 from 'client-oauth2';
-import express, { NextFunction, Request, Response } from "express";
+import { trimSuffix } from "@newdash/newdash/trimSuffix";
+import ClientOAuth2, { Options } from 'client-oauth2';
+import express, { Request } from "express";
 import got from "got";
-import createError, { HttpError } from "http-errors";
 import jwt from "jsonwebtoken";
 import url from "url";
-import { InjectType } from "../../constants";
-
-export function NotFoundHandler(req: Request, res: Response, next: NextFunction) {
-  next(createError(404));
-}
-
-export function ErrorHandler(err: HttpError, req: Request, res: Response, next: NextFunction) {
-  res.status(err.status || 500);
-  res.json({
-    error: err.message,
-    status: err.status | 500
-  });
-}
-
-export function createInjectRequestContainer(ic: InjectContainer) {
-
-  return async (req, res, next) => {
-    try {
-
-      const requestContainer = await ic.createSubContainer();
-
-      requestContainer.registerInstance(InjectType.Request, req);
-      requestContainer.registerInstance(InjectType.Response, res);
-      requestContainer.registerInstance(InjectType.NextFunction, next);
-      requestContainer.registerInstance(InjectType.ODataTransaction, createTransactionContext());
-
-      res.locals.container = requestContainer;
-
-      next();
-
-    } catch (error) {
-
-      next(error);
-
-    }
-
-  };
-}
-
 
 /**
  * fetch verify key with cache
@@ -57,10 +17,40 @@ const fetchVerifyKey = cacheIt(async (jku, kid) => {
   return key?.value;
 }, { provider: TTLCacheProvider, providerArgs: [60 * 60 * 1000, 60 * 1000] }); // with timeout cache (1 hour expire)
 
+const localhost = ['localhost', '127.0.0.1'];
 
-// TO DO, use prefix to navigate to correct url
+const isLocalHostDev = (req: Request) => localhost.includes(req.hostname);
+
 // dynamic get redirect url
-const getRedirectUrl = (req: Request) => `https://${req.headers.host}/login/callback`;
+const getRedirectUrl = (req: Request) => {
+  const host = req.headers.host;
+  // for local debug
+  if (isLocalHostDev(req)) {
+    return `http://${host}/login/callback`;
+  }
+  return `https://${host}/login/callback`;
+};
+
+const getUAAHost = (req: Request, uaa: any, appHost: string) => {
+  // remote client provided host
+  const host = req.headers.host;
+  const uaadomain = uaa.uaadomain;
+
+  // local dev
+  if (isLocalHostDev(req)) {
+    return url.parse(uaa.url).hostname;
+  }
+  // from main provision
+  if (host === appHost) {
+    return url.parse(uaa.url).hostname;
+  }
+  // from sub tenant
+  else {
+    const prefix = trimSuffix(host, `-${appHost}`);
+    return `${prefix}.${uaadomain}`;
+  }
+};
+
 
 const verifyAccessToken = async (accessToken: string, uaaCredential: any) => {
   const { jku, kid } = jwt.decode(accessToken, { complete: true })['header'];
@@ -89,25 +79,37 @@ const verifyAccessToken = async (accessToken: string, uaaCredential: any) => {
 
 };
 
+const createOAuthOptionsBuilder = (uaa: any, appHost: string) => (req: Request, options: Options = {}) => {
+  return {
+    ...options,
+    authorizationUri: `https://${getUAAHost(req, uaa, appHost)}/oauth/authorize`,
+    accessTokenUri: `https://${getUAAHost(req, uaa, appHost)}/oauth/token`,
+  };
+};
+
 /**
- * 
- * attach the uaa authentication & authorization to express app
- * 
- * ref the [cf uaa doc](https://docs.cloudfoundry.org/api/uaa/version/74.27.0/index.html#overview)
- * 
- * @param app 
- * @param uaaCredential 
- * @param appUri 
- */
+   * 
+   * attach the uaa authentication & authorization to express app
+   * 
+   * ref the [cf uaa doc](https://docs.cloudfoundry.org/api/uaa/version/74.27.0/index.html#overview)
+   * 
+   * @param app 
+   * @param uaaCredential 
+   * @param appUri 
+   */
 export function withUAA(app: express.Express, uaaCredential) {
+
+  const application = JSON.parse(process.env.VCAP_APPLICATION);
+  const applicationMainHost = application.application_uris[0];
 
   // TO DO, update uaa target with multi-tenant
   const oauth = new ClientOAuth2({
-    authorizationUri: `${uaaCredential.url}/oauth/authorize`,
-    accessTokenUri: `${uaaCredential.url}/oauth/token`,
+
     clientId: uaaCredential.clientid,
     clientSecret: uaaCredential.clientsecret,
   });
+
+  const buildOAuthOptions = createOAuthOptionsBuilder(uaaCredential, applicationMainHost);
 
   // public oauth login callback
   app.get("/login/callback", async req => {
@@ -116,7 +118,7 @@ export function withUAA(app: express.Express, uaaCredential) {
       req.next(new Error("You have logged, please do not access this url again."));
     }
     else if (!('code' in req.query)) {
-      // callback called, but not provider 'code'
+      // callback called, but client not provide the 'code'
       req.next(new Error("Not valid callback, must provide 'code' in query parameters."));
     }
     else {
@@ -124,9 +126,15 @@ export function withUAA(app: express.Express, uaaCredential) {
       try {
 
         // get user access token (can NOT be verified with public key)
-        const token = await oauth.code.getToken(req.originalUrl, {
-          redirectUri: getRedirectUrl(req)
-        });
+        const token = await oauth.code.getToken(
+          req.originalUrl,
+          buildOAuthOptions(
+            req,
+            {
+              redirectUri: getRedirectUrl(req)
+            }
+          )
+        );
 
         // verify jwt
         const user = await verifyAccessToken(token.accessToken, uaaCredential);
@@ -151,6 +159,8 @@ export function withUAA(app: express.Express, uaaCredential) {
 
   });
 
+
+  // middleware to process auth
   app.use(async (req: Request) => {
 
     try {
@@ -183,7 +193,7 @@ export function withUAA(app: express.Express, uaaCredential) {
             .from(authorizationContent, 'base64')
             .toString('utf8')
             .split(":");
-          const token = await oauth.owner.getToken(username, password);
+          const token = await oauth.owner.getToken(username, password, buildOAuthOptions(req));
           const user = await verifyAccessToken(token.accessToken, uaaCredential);
 
           // verified token
@@ -194,13 +204,13 @@ export function withUAA(app: express.Express, uaaCredential) {
           // go to next handler
           req.next();
         }
-        // without any other
+        // without jwt/basic authentication
         else {
           // store url to oauth.state
-          req.res.redirect(oauth.code.getUri({
+          req.res.redirect(oauth.code.getUri(buildOAuthOptions(req, {
             state: req.originalUrl,
-            redirectUri: getRedirectUrl(req)
-          }));
+            redirectUri: getRedirectUrl(req),
+          })));
         }
       } else {
         // session is login
@@ -213,5 +223,3 @@ export function withUAA(app: express.Express, uaaCredential) {
 
   });
 }
-
-

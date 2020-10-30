@@ -6,7 +6,7 @@ import { createRouter, register } from "../../.internal";
 import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
 import { injectControllers } from "../controllers";
-import { createInjectRequestContainer, ErrorHandler, NotFoundHandler, withUAA } from "./middlewares";
+import { createInjectRequestContainer, ErrorHandler, NotFoundHandler, odataMiddleware, withUAA } from "./middlewares";
 
 @register
 export class ServerProvider {
@@ -44,14 +44,13 @@ export class ServerProvider {
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
 
-
     app.use(createInjectRequestContainer(this.injectContainer));
 
     this.controllers.forEach(controller => {
       app.use(createRouter(controller));
     });
 
-    app.use("/odata", this.odata.create());
+    app.use("/odata", odataMiddleware);
 
     app.use(NotFoundHandler);
     app.use(ErrorHandler);
