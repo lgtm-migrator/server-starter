@@ -115,10 +115,6 @@ export function withUAA(app: express.Express, uaaCredential) {
     if (req.session.login === true) {
       req.next(new Error("You have logged, please do not access this url again."));
     }
-    else if (!('code' in req.query)) {
-      // callback called, but client not provide the 'code'
-      req.next(new Error("Not valid callback, must provide 'code' in query parameters."));
-    }
     else {
 
       try {
