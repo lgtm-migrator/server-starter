@@ -15,3 +15,14 @@ export class TenantIdProvider {
   }
 
 }
+
+@register
+export class UserIdProvider {
+
+  @withType(InjectType.UserId)
+  @transient
+  async provide(@noWrap @InjectRequest req: Request) {
+    return req.session?.user?.user_id || 'unknown';
+  }
+
+}

@@ -16,9 +16,9 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@newdash/inject": "^0.2.22",
-    "@newdash/newdash": "^5.16.0",
-    "@odata/server": "^0.2.45",
+    "@newdash/inject": "^0.2.25",
+    "@newdash/newdash": "^5.17.1",
+    "@odata/server": "^0.2.46",
     "@sap/xsenv": "^3.0.0",
     "client-oauth2": "^4.3.3",
     "cookie-parser": "^1.4.5",

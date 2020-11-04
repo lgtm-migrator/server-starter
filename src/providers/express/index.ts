@@ -16,6 +16,9 @@ export class ServerProvider {
   @injectControllers
   controllers: any[]
 
+  @inject(InjectType.Services)
+  services: any[]
+
   @withConfigValue("xsuaa")
   @noWrap
   uaaConfig: any

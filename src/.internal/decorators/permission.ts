@@ -13,6 +13,8 @@ export function hasScope(scope: string): MethodDecorator {
   }
 }
 
+
+
 export function hasAttribute(attrName: string, attrValue: any): MethodDecorator {
   return function (target, targetKey) {
     if (attrName !== undefined && attrValue !== undefined) {
