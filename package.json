@@ -16,7 +16,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@newdash/inject": "^0.2.25",
+    "@newdash/inject": "^0.2.27",
     "@newdash/newdash": "^5.17.1",
     "@odata/server": "^0.2.46",
     "@sap/xsenv": "^3.0.0",

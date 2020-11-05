@@ -14,7 +14,7 @@ export class FeatureFlagService {
   private config: FeatureFlagEnv
 
   @noWrap
-  private cache = new TTLCacheProvider(5 * 1000, 1000)
+  private cache = new TTLCacheProvider(5 * 1000, 1000) // cache with some seconds
 
   private async getFeatureFlagValue(flag: string, id: string) {
 
@@ -22,13 +22,14 @@ export class FeatureFlagService {
       return undefined;
     }
 
-    const res = await got(`${this.config.credentials.uri}/api/v2/evaluate/${flag}?identifier=${id}`, {
+    const url = `${this.config.credentials.uri}/api/v2/evaluate/${flag}?identifier=${id}`;
+
+    const res = await got(url, {
       headers: {
         "Authorization": "Basic " + Buffer
           .from(`${this.config.credentials.username}:${this.config.credentials.password}`)
           .toString("base64")
       }
-
     }).json();
 
     return res['variation'];

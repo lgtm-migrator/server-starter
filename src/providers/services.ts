@@ -21,12 +21,12 @@ export class ServicesProvider {
         const itemPath = path.join(__dirname, "../services", item);
         const moduleObject = await import(itemPath);
         if (moduleObject.default !== undefined) {
-          rt.push(await this.container.getParent().getWrappedInstance(moduleObject.default));
+          rt.push(await this.container.getWrappedInstance(moduleObject.default));
         } else {
           for (const key in moduleObject) {
             if (Object.prototype.hasOwnProperty.call(moduleObject, key)) {
               const propertyValue = moduleObject[key];
-              rt.push(await this.container.getParent().getWrappedInstance(propertyValue));
+              rt.push(await this.container.getWrappedInstance(propertyValue));
             }
           }
         }
