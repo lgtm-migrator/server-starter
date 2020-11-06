@@ -1,11 +1,12 @@
 import { noWrap } from "@newdash/inject";
 import { Request } from "express";
 import { Delete, InjectRequest, Put } from "../.internal";
-
+import { hasScope } from "../.internal/decorators/permission";
 
 export class MultiTenantController {
 
-  @Put('/callback/v1.0/tenants/*')
+  @Put("/callback/v1.0/tenants/*")
+  @hasScope("Callback")
   subscribe(@noWrap @InjectRequest req: Request) {
     const { subscribedSubdomain } = req.body;
     const tenantUrl = `https://${subscribedSubdomain}-${req.headers.host}`;
@@ -14,7 +15,8 @@ export class MultiTenantController {
     req.res.end(tenantUrl);
   }
 
-  @Delete('/callback/v1.0/tenants/*')
+  @Delete("/callback/v1.0/tenants/*")
+  @hasScope("Callback")
   unSubscribe(@noWrap @InjectRequest req: Request) {
     const { subscribedSubdomain } = req.body;
     const tenantUrl = `https://${subscribedSubdomain}-${req.headers.host}`;

@@ -4,8 +4,7 @@ import express from "express";
 import "reflect-metadata";
 import { Configuration } from "../../config";
 import { InjectType } from "../../constants";
-import { FeatureFlagService } from "../../services/FeatureFlagService";
-import { getFeatureValue } from "./feature";
+import { isEnabledFeature, isFeature } from "./feature";
 import { checkPermission } from "./permission";
 
 const KEY_METHOD_HTTP_METHOD = "controller:method:http_method"
@@ -78,37 +77,23 @@ export function createRouter(controller) {
 
         try {
           const uaaConfig: any = await (await c.getInstance(Configuration)).get("xsuaa")
+          const unwrappedController = getUnProxyTarget(controller)
 
+          // decorated with @scope
           if (uaaConfig !== undefined) {
             checkPermission(
-              getUnProxyTarget(controller),
+              unwrappedController,
               methodName,
               req.session.user,
               uaaConfig.credentials
             )
           }
 
-          const featureValue = getFeatureValue(getUnProxyTarget(controller), methodName)
-
-          if (featureValue !== undefined) {
-            const fs = await c.getWrappedInstance(FeatureFlagService);
-
-            if (featureValue.tenant === true) {
-              const evaluatedValue = await fs.evaluate(
-                featureValue.flag,
-              )
-              if (evaluatedValue !== featureValue.value) {
-                return next()
-              }
-            } else if (featureValue.user === true) {
-              const evaluatedValue = await fs.userAwareEvaluate(
-                featureValue.flag,
-              )
-              if (evaluatedValue !== featureValue.value) {
-                return next()
-              }
+          // decorated with @feature
+          if (isFeature(unwrappedController, methodName)) {
+            if (!isEnabledFeature(unwrappedController, methodName, c)) {
+              return next()
             }
-
           }
 
           let rt = await c.injectExecute(controller, controller[methodName], {})
