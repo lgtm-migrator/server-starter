@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "open-tunnel",
+      "type": "shell",
+      "command": "cf ssh mt-server-starter -N -L 39999:127.0.0.1:39999",
+      "problemMatcher": []
+    }
+  ]
+}

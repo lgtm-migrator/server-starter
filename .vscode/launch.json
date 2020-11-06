@@ -41,7 +41,7 @@
       "remoteRoot": "/home/vcap/app",
       "skipFiles": [
         "<node_internals>/**"
-      ]
+      ],
     },
   ]
 }
